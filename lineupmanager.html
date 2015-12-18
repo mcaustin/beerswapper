@@ -1,0 +1,211 @@
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta http-equiv="cache-control" content="max-age=0" />
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="expires" content="0" />
+<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+<meta http-equiv="pragma" content="no-cache" />
+
+<html ng-app="angularApp">
+<title>Beer Swap Manager</title>
+
+<script src="angular.js"></script>
+
+<script type="text/javascript">
+
+    function shuffle(o){
+        for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+        return o;
+    }
+
+    var app = angular.module('angularApp', []);
+
+    app.controller('lineUpController', function($scope) {
+
+      $scope.shuffle = function() {
+        $scope.roster = $scope.list.split(",");
+        $scope.roster = shuffle($scope.roster);
+        $scope.enabled = true;
+      }
+
+
+      $scope.startLineUp = function() {
+        $scope.rosterReverse = $scope.roster.slice().reverse();
+
+        $scope.rosterArray = [];
+        $scope.rosterArray.push($scope.roster);
+        $scope.rosterArray.push($scope.rosterReverse);
+        $scope.rosterArray.push($scope.roster);
+        $scope.rosterArray.push($scope.rosterReverse);
+        $scope.rosterArray.push($scope.roster);
+        $scope.rosterArray.push($scope.rosterReverse);
+
+        $scope.list = "";
+        $scope.mode = 2;
+        $scope.totalPlayers = $scope.roster.length;
+      }
+
+      $scope.switchSetup = function() {
+        $scope.mode = 1;
+      }
+
+      $scope.isCurrentTurn = function(round, index) {
+        return (round == $scope.round) && (index == $scope.turnIndex);
+      }
+
+      $scope.next = function() {
+        $scope.turn = $scope.turn + 1;
+
+        $scope.turnIndex = $scope.turn % $scope.totalPlayers;
+        $scope.round = Math.floor($scope.turn / $scope.totalPlayers) + 1;
+
+      }
+
+      $scope.getPlayer = function(turn) {
+        var round = Math.floor(turn / $scope.totalPlayers);
+        var turnIndex = turn % $scope.totalPlayers;
+
+        return $scope.rosterArray[round][turnIndex];
+      }
+
+      $scope.back = function() {
+        $scope.turn = $scope.turn - 1;
+
+        $scope.turnIndex = $scope.turn % $scope.totalPlayers;
+        $scope.round = Math.floor($scope.turn / $scope.totalPlayers) + 1;
+
+      }
+      $scope.reset = function() {
+        $scope.roster = ['Roster', 'shows up here'];
+        $scope.turn = 0;
+        $scope.turnIndex = 0;
+        $scope.totalPlayers = 0;
+        $scope.direction = 1;
+        $scope.round = 1;
+      }
+      $scope.enabled = false;
+      $scope.rosterArray = [];
+      $scope.reset();
+      $scope.mode = 1;
+
+    });
+
+</script>
+
+<style>
+    .currentTurn {
+        color: red !important;
+        font-weight: bold;
+        font-size: 300%;
+    }
+
+    .currentRound {
+        font-size: 125%;
+    }
+
+    .roundTitleBold {
+        font-weight: bold;
+    }
+
+    .firstColumn {
+        padding-right:20px;
+    }
+
+    .table-wrapper
+    {
+    border: 1px solid red;
+    overflow: auto;
+    }
+
+    table
+    {
+    border: 1px solid black;
+    margin-right: 20px;
+    }
+
+    td
+    {
+    width: 20px;
+    height: 20px;
+    }
+
+    .center-wrapper {
+        text-align:center;
+    }
+
+</style>
+
+
+    <body ng-controller="lineUpController">
+    <div ng-show="false">
+    |turnIndex -> {{turnIndex}}|
+    |mode -> {{mode}}|
+    |rosterArray -> {{rosterArray}}|
+    |totalPlayers -> {{totalPlayers}}|
+    |round -> {{round}}|
+        </div>
+        <div ng-show="mode==1">
+            <h1>
+                Setup
+            </h1>
+            Enter comma separated list:
+            <textarea type="text" ng-model="list" rows="10" cols="100"></textarea>
+            <p>
+                <button type="button" ng-show="enabled" ng-click="startLineUp()">
+                    Start Line Up Manager!
+                </button>
+            </p>
+            <p>
+                <button type="button" ng-click="shuffle()">
+                    Shuffle
+                </button>
+            </p>
+            <p>
+                Shuffled Array: {{roster}}
+            </p>
+        </div>
+        <div class="center-wrapper" ng-show="mode==2">
+            <h1>
+                Beer Swapper!
+            </h1>
+
+            <div style="display:block">
+                <img src="toast.png" width="200px" height="200px">
+                <div style="display:inline-block">
+                    <div style="font-size:300%;">NOW SELECTING:<b>{{getPlayer(turn)}}</b></div>
+                    <div style="font-size:250%;display:block;">ON DECK:<b>{{getPlayer(turn+1)}}</b></div>
+                    <div style="font-size:200%;display:block;">IN THE HOLE:<b>{{getPlayer(turn+2)}}</b></div>
+                </div>
+                <img src="beer.jpg" width="200px" height="200px">
+            </div>
+
+            <div class="table-wrapper">
+                <table width="100%">
+                    <tr ng-class="{currentRound:($index+1)==round}" ng-repeat="roster in rosterArray track by $index">
+                        <td class="firstColumn" ng-class="{roundTitleBold:($index+1)==round}">Round {{$index+1}}</td>
+                        <td ng-repeat="name in roster track by $index"><div ng-class="{currentTurn:isCurrentTurn($parent.$index+1,$index)}">{{name}}</div></td>
+                    </tr>
+                </table>
+            </div>
+
+
+
+            <table>
+                <td>
+                    <button type="button" ng-click="next()">
+                        Next
+                    </button>
+                </td>
+                <td>
+                    <button type="button" ng-click="back()">
+                        Back
+                    </button>
+                </td>
+            </table>
+
+
+        </div>
+
+    </body>
+
+</html>
+
