@@ -132,39 +132,6 @@
         text-align:center;
     }
 
-    .blink,
-    .rotate {
-        animation-duration: 1s;
-        animation-iteration-count: infinite;
-        animation-timing-function: linear;
-    }
-
-    .blink {
-        animation-name: blinker;
-    }
-
-    .rotate {
-        animation-name: rotator;
-    }
-
-    @keyframes blinker {
-        0% {
-            opacity: 1;
-        }
-        100% {
-            opacity: 0;
-        }
-    }
-
-    @keyframes rotator {
-        0% {
-            transform: rotate(0deg);
-        }
-        100% {
-            transform: rotate(360deg);
-        }
-    }
-
 </style>
 
 
@@ -197,13 +164,13 @@
             </p>
         </div>
         <div class="center-wrapper" ng-show="mode==2">
-            <h1 class="blink">
+            <h1>
                 Beer Swapper!
             </h1>
 
             <div style="display:block">
                 <img src="toast.png" width="200px" height="200px">
-                <div class="rotate" style="display:inline-block">
+                <div style="display:inline-block">
                     <div style="font-size:300%;">NOW SELECTING:<b>{{getPlayer(turn)}}</b></div>
                     <div style="font-size:250%;display:block;">ON DECK:<b>{{getPlayer(turn+1)}}</b></div>
                     <div style="font-size:200%;display:block;">IN THE HOLE:<b>{{getPlayer(turn+2)}}</b></div>
