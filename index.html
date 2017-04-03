@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html ng-app="angularApp">
+    <head>
+        <script src="angular.js"></script>
+        <script src="beerapp.js"></script>
+        
+        <title>Beer Swap Swarm Manager</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <style>
+            .portrait {
+                height: 100px;
+                width: 100px;
+            }
+            
+            .portrait-large {
+                height: 300px;
+                width: 300px;
+            }
+            
+            .portrait-image {
+                max-width: 100%;
+                max-height: 90%;
+            }
+            .center-in-div {
+                margin: 0 auto;
+                width:99%;
+                text-align: center;
+            }
+            
+            .center-wrapper {
+                text-align: center;
+            }
+            
+            .sub-centered-div {
+                display:inline-block;
+            }
+            
+            input[type="text"] {
+                width:200px;
+                height: 80px;
+                font-size: 20px;
+            }
+            
+            .box {
+                float:left; width: 40%;
+                border: 2px solid;
+                border-radius: 16px;
+                padding: 18px;
+                margin:2px;
+            }
+            
+            .big-button {
+                font-size: 20px;
+                max-width: 80%;
+                height: 50px;
+                margin: 0 auto;
+            }
+            
+        </style>
+        
+    </head>
+
+    <body ng-controller="lineUpController">
+
+        <div ng-show="gameMode==0">
+            <h1>Start a new swap or join an existing one!</h1>
+            <div class="box" style="display:block">
+                <button class="center-in-div big-button" type="button" ng-click="startGame()">
+                Start a new Swap
+                </button>
+            </div>
+
+            <div class="box">    
+                <input class="center-in-div" style="display:block" type="text" placeholder="name" ng-model="playerName">
+                <input class="center-in-div" style="display:block" type="text" placeholder="code" ng-model="codeInput" capitalize>
+                <button class="center-in-div big-button" type="button" ng-click="joinGame()">
+                    Join Existing Swap
+                </button>
+            </div>
+         </div>
+        
+        <div ng-show="gameMode==1">
+            <h1>www.BEERSWAP.HEROBO.com</h1>
+            <h1>CODE = {{game.code}}</h1>
+            
+            <h2>Current Players</h2>
+            <table>
+                <tr>
+                    <td>NAME</td>
+                    <td>IMAGE</td>
+                    <td>TURN ORDER</td>
+                    <td>OPTION</td>
+                </tr>
+                <tr ng-repeat="player in game.currentPlayers">
+                    <td>{{player.name}}</td>
+                    <td><div ng-show="player.image.length>0" class="portrait"><img class="portrait-image" ng-src="{{player.image}}"></div></td>
+                    <td>{{player.turnorder}}</td>
+                    <td><a href="" ng-click="kickPlayer(player)">Kick from Game</a></td>
+                </tr>
+                <tr>
+                    <td><input type="text" placeholder="name" ng-model="newName"></td>
+                    <td><input type="text" placeholder="image" ng-model="newImage"></td>
+                    <td><input type="text" placeholder="turnorder" ng-model="newTurnOrder"></td>
+                    <td><a href="" ng-click="addPlayer()">Add to Game</a></td>
+                </tr>
+            </table>
+            <h2>Controls</h2>
+            <div style="display:block">
+                <button type="button" ng-click="randomizeTurnOrder()">
+                Randomize Turn Order
+                </button>
+                <button type="button" ng-click="switchToPlayMode()">
+                Switch to Play Mode
+                </button>
+            </div>
+            
+        </div>
+        
+        <div class="center-wrapper" ng-show="gameMode==2">
+            <div class="sub-centered-div">
+                <h1>JOINED GAME {{code}}</h1>
+                <div style="display:block">
+                    <div class="portrait center-in-div"><img class="portrait-image" ng-src="{{player.image}}"></div>
+                    <h4 class="center-in-div">{{player.name}}</h4>
+                </div>
+                
+                <div class="center-in-div">
+                    <h5>Choose a pre-selected icon</h5>
+                    <select name="repeatSelect" id="repeatSelect" ng-model="player.image">
+                        <option ng-repeat="image in stockimages" value="{{image.url}}">{{image.name}}</option>
+                    </select>
+                </div>
+                
+                <div class="center-in-div">
+                    <h5>Enter a custom image url</h5>
+                    <input style="display:block" type="text" placeholder="custom img Url" ng-model="player.image">
+                </div>
+                
+                <button type="button" ng-click="updatePlayer()">
+                    Update
+                </button>
+
+                <h2>Current Players</h2>
+                <ul>
+                    <li ng-repeat="player in game.currentPlayers">{{player.name}}::{{player.turnorder}}</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="center-wrapper" ng-show="gameMode==3"> 
+            <div class="sub-centered-div">
+                <h1>
+                    Beer Swapper! Game Started!
+                </h1>
+                <h3>
+                    Turn {{game.turn}} of {{game.currentPlayers.length * roundLength}}
+                </h3>
+
+                <div style="display:block">
+                    <div style="display:inline-block">
+                        <h4 class="center-in-div">{{superPreviousName}}</h4>
+                    </div>
+                    
+                    <div style="display:inline-block">
+                        <div class="portrait center-in-div"><img class="portrait-image" ng-src="{{previousImage}}"></div>
+                        <h4 class="center-in-div">{{previousName}}</h4>
+                    </div>
+                    <div style="display:inline-block">
+                        <div class="portrait-large center-in-div"><img class="portrait-image" ng-src="{{currentImage}}"></div>
+                        <h3 class="center-in-div">{{currentName}}</h4>
+                    </div>
+                    <div style="display:inline-block">
+                        <div class="portrait center-in-div"><img class="portrait-image" ng-src="{{nextImage}}"></div>
+                        <h4 class="center-in-div">{{nextName}}</h4>
+                    </div>
+                    
+                    <div style="display:inline-block">
+                        <h4 class="center-in-div">{{superNextName}}</h4>
+                    </div>
+                </div>
+
+                <div style="display:block">
+                    <button type="button" ng-click="updateTurn(1)">
+                    Next
+                    </button>
+                    <button type="button" ng-click="updateTurn(-1)">
+                    Previous
+                    </button>
+                </div>
+
+                <div style="display:block">
+                    <button type="button" ng-click="gameMode = 1">
+                    Switch to Config Mode
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>
